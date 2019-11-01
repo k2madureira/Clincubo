@@ -2,12 +2,12 @@ import { startOfHour, parseISO, isBefore, format, subHours } from 'date-fns';
 const { resolve } = require('path');
 import fs from 'fs';
 
-//import pathFile from '../config/database';
+import pathFile from '../config/database';
 
-class Attendance {
+class Rule {
   constructor() {
     this.rules = [];
-    this.path = resolve(__dirname, '..','..','database','rules.json');
+    this.path = resolve(__dirname, '..','..','database', pathFile.db);
     this.loadJson();
   }
   
@@ -20,52 +20,87 @@ class Attendance {
           console.log(err);
       } else {
       
+    if(data) {
       const rules_obj = JSON.parse(data); 
       
       for (let i = 0; i < rules_obj.length; i++) {
         localRules.push(rules_obj[i]);
       }  
+    }
 
     }});
 
     this.rules = localRules;
   }
 
-  create(data) {
+  list() {
+    return this.rules;
+  }
 
-    const { type, date, hours:[ start, end] } = data;
+  create(typ ,data) {
 
-    const rule = {
-      type,
-      date,
-      hours:[
-        start,
-        end
-      ]
-    }; 
+    const { id, date, days, start, end } = data;
+    
+    const types = ['especifico','diario','semanal'];
+    let type = types[typ];
 
-    this.rules.push( rule );
+    const findDate_esp = this.rules.find(rule =>rule.date === date && rule.type === type); // específico
+
+
+    if (findDate_esp) {
+      this.rules.find(rule =>rule.date === date && rule.type === type).hours.push({ start, end });
+    } else {
+
+      const rule = {
+        id,
+        type,
+        date,
+        days,
+        hours:[{
+          start,
+          end
+        }]
+      }; 
+  
+      this.rules.push( rule );
+
+    }
 
     const json = JSON.stringify(this.rules);
     
 
     fs.writeFile(this.path, json, 'utf8', function(err) {
       if (err) throw err;
-      console.log('complete');
+      console.log('Banco atualizado');
       }
     );
 
     return this.rules;
   }
 
-  list() {
+  delete(id) {
+
+    const rules = this.rules;
+
+    const index = rules.findIndex(rule => rule.id === parseInt(id));
+    this.rules.splice(index, 1);
+
+    const json = JSON.stringify(this.rules);
+    
+
+    fs.writeFile(this.path, json, 'utf8', function(err) {
+      if (err) throw err;
+      console.log('Banco atualizado');
+      }
+    );
+
     return this.rules;
-  }
 
-  find() {
 
   }
+
+ 
 
 }
 
-export default new Attendance;
+export default new Rule;
