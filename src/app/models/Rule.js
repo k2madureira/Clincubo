@@ -1,4 +1,4 @@
-import { startOfHour, parseISO, isBefore, format, subHours } from 'date-fns';
+import { parseISO, format, isEqual, isBefore, isAfter } from 'date-fns';
 const { resolve } = require('path');
 import fs from 'fs';
 
@@ -7,7 +7,7 @@ import pathFile from '../config/database';
 class Rule {
   constructor() {
     this.rules = [];
-    this.path = resolve(__dirname, '..','..','database', pathFile.db);
+    this.path = resolve(__dirname, '..','..','database', pathFile.db); 
     this.loadJson();
   }
   
@@ -34,28 +34,106 @@ class Rule {
   }
 
   list() {
-    return this.rules;
+
+    let rules = [...this.rules];
+   
+
+    rules.forEach(rule => {
+      let date = rule.date;
+
+      if(date) {
+        let aux = parseISO(date+' '+'00:00:00.000');
+            aux = format(aux, "dd-MM-yyyy");
+            rules.date = aux;
+            
+      }
+    });
+
+    
+    return rules;
   }
+
+  period(data){
+
+    // 
+
+    const { date1: since, date2: until } = data;
+
+
+    let [sinceDay, sinceMonth, sinceYear] = since.split("-"); // Posso dar um join aqui?
+    let [untilDay,untilMonth,  untilYear] = until.split("-"); 
+
+    let date1_aux = sinceYear+'-'+sinceMonth+'-'+sinceDay;
+    let date2_aux = untilYear+'-'+untilMonth+'-'+untilDay;;
+
+    let rules = [...this.rules]; 
+    let rules_period = [];
+
+    rules.forEach(rule => {
+      let date = rule.date;
+      
+
+      if(date) {
+
+         let [  Year, Month, Day ] = date.split("-"); 
+
+         let first_date = parseISO(date1_aux+' '+'00:00:00.000'); 
+         let second_date = parseISO(date2_aux+' '+'00:00:00.000');
+         let aux = parseISO(date+' '+'00:00:00.000');
+           
+
+         let equal_first = isEqual(new Date(sinceYear, sinceMonth-1, sinceDay), new Date(Year, Month-1, Day));
+         let equal_second = isEqual(new Date(untilYear, untilMonth-1, untilDay), new Date(Year, Month-1, Day)); 
+
+         let before = isBefore( new Date(Year, Month-1, Day) , new Date(untilYear, untilMonth-1, untilDay));
+         let after = isAfter( new Date(Year, Month-1, Day), new Date(sinceYear, sinceMonth-1, sinceDay));
+
+         /*console.log(new Date(Year, Month-1, Day));
+         console.log( new Date(sinceYear, sinceMonth-1, sinceDay));
+         console.log(  new Date(untilYear, untilMonth-1, untilDay) );
+         console.log(equal_first, ' ',after,' ',before,' ',equal_second);*/
+         
+        
+         if (equal_first || after && before ||equal_second) {
+
+           rules_period.push(rule);
+         }
+        
+           
+      }
+    });
+
+    
+
+    return rules_period.map(r => ({...r, date: r.date.split('-').reverse().join('-')}));
+
+  }
+
 
   create(typ ,data) {
 
-    const { id, date, days, start, end } = data;
+    const { date, days, start, end } = data;
+
+    var date_aux = date ? date: null;
+    var days_aux = days ? days: []; 
     
-    const types = ['especifico','diario','semanal'];
+    const types = ['specific','daily','weekly'];
     let type = types[typ];
 
-    const findDate_esp = this.rules.find(rule =>rule.date === date && rule.type === type); // específico
+    const findDate_esp = this.rules.find(rule =>rule.date === date_aux && rule.type === type); // específico
 
 
     if (findDate_esp) {
-      this.rules.find(rule =>rule.date === date && rule.type === type).hours.push({ start, end });
+      this.rules.find(rule =>rule.date === date_aux && rule.type === type).hours.push({ start, end });
     } else {
+
+      var id = this.rules.length +1;
 
       const rule = {
         id,
         type,
-        date,
-        days,
+        date: date_aux,
+        days: days_aux,
         hours:[{
           start,
           end
@@ -76,6 +154,31 @@ class Rule {
     );
 
     return this.rules;
+  }
+
+  update(typ ,data) {
+
+    const { days, start, end } = data;
+   
+    var days_aux = days ? days: []; 
+    
+    const types = ['specific','daily','weekly'];
+    let type = types[typ];
+
+    if(type === 'daily') {
+      const index = this.rules.findIndex(rule => rule.type === type);
+      this.rules[index].hours.start = start;
+      this.rules[index].hours.end = end;
+
+    }else if (type === 'weekly') {
+      const index = this.rules.findIndex(rule => rule.type === type);
+      this.rules[index].days = days_aux;
+      this.rules[index].hours.start = start;
+      this.rules[index].hours.end = end;
+    }  
+
+    return this.rules;
+
   }
 
   delete(id) {

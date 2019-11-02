@@ -11,6 +11,11 @@ class ruleController {
     return res.json(rules);
   }
 
+  async period (req, res) {
+    const rules = Rule.period(req.query);
+
+    res.json(rules);
+  }  
   async store (req, res) {
     
     const { type } = req.params;
@@ -31,13 +36,13 @@ class ruleController {
 
   
     // Caso encontre a data cadastrada no dia específico;
-    const findEspecifico = rules.find(rule =>rule.date === date && rule.type === 'especifico');
+    const findEspecifico = rules.find(rule =>rule.date === date && rule.type === 'specific');
 
     if (findEspecifico) {
 
       var erro = '';
       const available = rules.find(rule =>{
-       if(rule.date === date && rule.type === 'especifico'){
+       if(rule.date === date && rule.type === 'specific'){
          
        
         for (let i = 0; i < rule.hours.length; i++) {
@@ -100,20 +105,25 @@ class ruleController {
 
       if (ty === 1) {
 
-        var findDiario = rules.find(rule => rule.type === 'diario' );
+        var findDiario = rules.find(rule => rule.type === 'daily' );
 
       }else if(ty === 2) {
 
-        var findSemanal = rules.find(rule => rule.type === 'semanal');
+        var findSemanal = rules.find(rule => rule.type === 'weekly');
 
       } 
 
 
-      if (findDiario) {
-        return res.status(401).json({ menssage : "A regra diária já foi cadastrada, por favor realizar a atualização. "});
-      } else if (findSemanal) {
-        return res.status(401).json({ menssage : "A regra semanal já foi cadastrada, por favor realizar a atualização. "});
-      }
+      if (findDiario || findSemanal) {
+        const update = await Rule.update(type, req.body);
+
+        return res.json({ 
+          menssage : "Successfully updated rule!",
+          update
+        
+        });
+
+      } 
      
 
    }
