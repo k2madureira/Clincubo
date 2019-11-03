@@ -18,13 +18,21 @@ class ruleController {
   }  
   async store (req, res) {
     
+    const types = ['specific','daily','weekly'];
     const { type } = req.params;
     const { date, start, end } = req.body;
-    const rules = await Rule.list();
+    const Rules = await Rule.list();
+
+    const rules = Rules.map(r => ({...r, date: r.date? r.date.split('-').reverse().join('-') : null   }) );
 
     
+    const verifyType = types.find(r => r === type);
 
-    if(date) {
+    if(!verifyType) {
+      return res.status(401).json({ Error: `Type ${type} wrong. Please try using one of these [ `+types.map(r => r)+` ]`});
+    }
+
+  if(date) {
 
     var start_req_aux = parseISO(date+' '+start+':00.000');
     var end_req_aux = parseISO(date+' '+end+':00.000');
@@ -34,87 +42,64 @@ class ruleController {
     var endH_req= parseInt( format(end_req_aux, "H"));
     var endM_req = parseInt( format(end_req_aux, "mm"));
 
-  
-    // Caso encontre a data cadastrada no dia específico;
-    const findEspecifico = rules.find(rule =>rule.date === date && rule.type === 'specific');
+    // If find the date registered on the specific day;
+    const findSpecific= rules.find(rule =>rule.date === date && rule.type === 'specific');
 
-    if (findEspecifico) {
+    if (findSpecific) {
 
-      var erro = '';
-      const available = rules.find(rule =>{
-       if(rule.date === date && rule.type === 'specific'){
+      var err = '';
+      rules.find(rule =>{
+
+        if(rule.date === date && rule.type === 'specific'){
          
-       
-        for (let i = 0; i < rule.hours.length; i++) {
-         
-          let startH_base_aux = parseISO(date+' '+rule.hours[i].start+':00.000');
-          let endH_base_aux = parseISO(date+' '+rule.hours[i].end+':00.000');
+          for (let hour of rule.hours) {
+          
+            let startH_base_aux = parseISO(date+' '+hour.start+':00.000');
+            let endH_base_aux = parseISO(date+' '+hour.end+':00.000');
 
-          var startH_base= parseInt( format(startH_base_aux, "H"));
-          var startM_base= parseInt( format(startH_base_aux, "mm"));
-          var endH_base= parseInt( format(endH_base_aux, "H"));
-          var endM_base= parseInt( format(endH_base_aux, "mm"));
+            var startH_base= parseInt( format(startH_base_aux, "H"));
+            var startM_base= parseInt( format(startH_base_aux, "mm"));
+            var endH_base= parseInt( format(endH_base_aux, "H"));
+            var endM_base= parseInt( format(endH_base_aux, "mm"));
 
-          if (startH_req !== startH_base) {
-            
-            erro = '';
-            if (startH_req>=startH_base && startH_req<=endH_base) {
-
-              if (startH_req === endH_base && startM_req > endM_base) {
-                erro = '';
-                break;
-              }
-              erro = 'err2';
-              break;
-            } else if (endH_req>=startH_base && endH_req<=endH_base)  {
+            if (startH_req !== startH_base) {
               
-              erro = 'err3';
-              break;
-            }           
-            
-          } else {
-            erro = 'err1';
-            break;
-          }
+              err = '';
+              if (startH_req>=startH_base && startH_req<=endH_base) {
 
+                if (startH_req === endH_base && startM_req > endM_base) {
+                  break;
+                }
+                err = 'Hour start beetwen another rule';
+                break;
+              } else if (endH_req>=startH_base && endH_req<=endH_base)  {
+                
+                err = 'Hour end beetwen another rule';
+                break;
+              }           
+              
+            } else {
+              err = 'Hour already exist';
+              break;
+            }
+
+          }
         }
-        
-        
-       }
       });
 
-     
-
-      if(erro === 'err1') {
-       
-        return res.status(401).json({ error: "Hour already exist"});
-
-      } else if (erro === 'err2') {
-
-        return res.status(401).json({ error: "Hour start beetwen another rule"});
-
-      } else if (erro === 'err3') {
-
-        return res.status(401).json({ error: "Hour end beetwen another rule"});
-
+    
+      if(err) { 
+        return res.status(401).json({ error: err });
       }
+
+
     }
-   } else {
+    
+  } else {
 
-      let ty = parseInt(type);
+      const findTypes = rules.find(rule => rule.type === type );
 
-      if (ty === 1) {
-
-        var findDiario = rules.find(rule => rule.type === 'daily' );
-
-      }else if(ty === 2) {
-
-        var findSemanal = rules.find(rule => rule.type === 'weekly');
-
-      } 
-
-
-      if (findDiario || findSemanal) {
+      if (findTypes) {
         const update = await Rule.update(type, req.body);
 
         return res.json({ 
@@ -122,18 +107,15 @@ class ruleController {
           update
         
         });
-
       } 
      
-
-   }
-   
-
-
+  }
 
     const rule = Rule.create( type, req.body );
-
-    return res.json(rule);
+    return res.json({
+      status: 'Success',
+      rule
+    });
     
   }
 
@@ -143,9 +125,6 @@ class ruleController {
     const rules = await Rule.delete(id);
 
     return res.json(rules);
-
-    
-
 
   }
 }
