@@ -144,7 +144,9 @@ class Rule {
   period(data){
 
     
+    
     const { since , until } = data;
+    
 
     const [sinceDay, sinceMonth, sinceYear] = since.split("-"); 
     const [untilDay,untilMonth,  untilYear] = until.split("-"); 
@@ -152,12 +154,15 @@ class Rule {
     const rules = [...this.rules]; 
     let rules_period = [];
 
+    
+
     rules.forEach(rule => {
       let date = rule.date;
       
-
+      
       if(date) {
-
+        
+       
          const [  Year, Month, Day ] = date.split("-"); 
 
          const equal_first = isEqual(new Date(sinceYear, sinceMonth-1, sinceDay), new Date(Year, Month-1, Day));
