@@ -11,6 +11,33 @@ class Rule {
     this.loadJson();
   }
   
+
+  /**
+ * @api loadJson()
+ * @apiGroup Rule
+ *
+ * @apiSuccess {Array} Loads all rules stored in the database.
+ * 
+ * @apiSuccessExample {json} 
+ *    HTTP/1.1 200 OK
+ *    [
+ *      {
+ *        "id": 1,
+ *        "type": "daily",
+ *        "date": null,
+ *        "days": [],
+ *        "hours": [
+ *         {
+ *            "start": "08:00",
+ *            "end": "10:05"
+ *          }
+ *        ]
+ *      }
+ *     ]
+ *    
+ *
+ */
+
   loadJson() {
 
     const localRules = [];
@@ -30,6 +57,34 @@ class Rule {
     this.rules = localRules;
   }
 
+
+   /**
+ * @api list()
+ * @apiGroup Rule
+ *
+ * 
+ * @apiSuccess {Array} Lists all rules stored in the constructor rules variable
+ * 
+ * @apiSuccessExample {json} 
+ *    HTTP/1.1 200 OK
+ *    [
+ *      {
+ *        "id": 1,
+ *        "type": "daily",
+ *        "date": null,
+ *        "days": [],
+ *        "hours": [
+ *         {
+ *            "start": "05:00",
+ *            "end": "06:05"
+ *          }
+ *        ]
+ *      }
+ *     ]
+ *    
+ *
+ */
+
   list() {
 
     let rules = [...this.rules];
@@ -37,6 +92,54 @@ class Rule {
     return rules.map(r => ({...r, date: r.date? r.date.split('-').reverse().join('-') : null   }) );
 
   }
+
+   /**
+ * @api period()
+ * @apiGroup Rule
+ *
+ * @apiParam {Date} Using the query. Fild1 (since) => '01-11-2019'; Fild2 (until) => '10-11-2019';
+ * @apiSuccess {Array} Lists all rules in a given period;
+ * 
+ * @apiSuccessExample {json} 
+ *    HTTP/1.1 200 OK
+ *    [
+ *      {
+ *        "id": 2,
+ *        "type": "specific",
+ *        "date": 01-11-2019,
+ *        "days": [],
+ *        "hours": [
+ *         {
+ *            "start": "05:00",
+ *            "end": "06:05"
+ *          },
+ *          {
+ *            "start": "06:20",
+ *            "end": "07:00"
+ *          }
+ *        ]
+ *      },
+ * 
+ *       {
+ *        "id": 2,
+ *        "type": "specific",
+ *        "date": 10-11-2019,
+ *        "days": [],
+ *        "hours": [
+ *         {
+ *            "start": "05:00",
+ *            "end": "06:05"
+ *          },
+ *          {
+ *            "start": "06:20",
+ *            "end": "07:00"
+ *          }
+ *        ]
+ *      }
+ *     ]
+ *    
+ *
+ */
 
   period(data){
 
@@ -78,6 +181,40 @@ class Rule {
   }
 
 
+  /**
+ * @api create()
+ * @apiGroup Rule
+ *
+ * @apiParam {string} type > query.params (/rules/:type);
+ * @apiParam {Date} date  > 'YYYY-MM-DD';
+ * @apiParam {Array} days > [ 'Monday', 'Friday' ];
+ * @apiParam {string} start >  09:00;
+ * @apiParam {string} end > 10:00;
+ * @apiSuccess {Array} Lists all rules;
+ * 
+ * @apiSuccessExample {json} 
+ *    HTTP/1.1 200 OK
+ *    [
+ *      {
+ *        "id": 2,
+ *        "type": "specific",
+ *        "date": 01-11-2019,
+ *        "days": [],
+ *        "hours": [
+ *         {
+ *            "start": "05:00",
+ *            "end": "06:05"
+ *          },
+ *          {
+ *            "start": "06:20",
+ *            "end": "07:00"
+ *          }
+ *        ]
+ *      }
+ *     ]
+ *    
+ *
+ */
   create(type ,data) {
 
     const { date, days, start, end } = data;
@@ -121,6 +258,39 @@ class Rule {
     return this.rules;
   }
 
+  /**
+ * @api  update()
+ * @apiGroup Rule
+ *
+ * @apiParam {Array} days > [ 'Monday', 'Friday' ];
+ * @apiParam {string} start > 09:00;
+ * @apiParam {string} end > 10:00;
+ * @apiSuccess {Array} Lists all rules;
+ * 
+ * @apiSuccessExample {json} 
+ *    HTTP/1.1 200 OK
+ *    [
+ *      {
+ *        "id": 2,
+ *        "type": "specific",
+ *        "date": 01-11-2019,
+ *        "days": [],
+ *        "hours": [
+ *         {
+ *            "start": "05:00",
+ *            "end": "06:05"
+ *          },
+ *          {
+ *            "start": "06:20",
+ *            "end": "07:00"
+ *          }
+ *        ]
+ *      }
+ *     ]
+ *    
+ *
+ */
+
   update(type ,data) {
 
     const { days, start, end } = data;
@@ -144,6 +314,37 @@ class Rule {
     return this.rules;
 
   }
+
+   /**
+ * @api  delete()
+ * @apiGroup Rule
+ *
+ * @apiParam {Number} id > 3;
+ * @apiSuccess {Array} Lists all rules;
+ * 
+ * @apiSuccessExample {json} 
+ *    HTTP/1.1 200 OK
+ *    [
+ *      {
+ *        "id": 2,
+ *        "type": "specific",
+ *        "date": 01-11-2019,
+ *        "days": [],
+ *        "hours": [
+ *         {
+ *            "start": "05:00",
+ *            "end": "06:05"
+ *          },
+ *          {
+ *            "start": "06:20",
+ *            "end": "07:00"
+ *          }
+ *        ]
+ *      }
+ *     ]
+ *    
+ *
+ */
 
   delete(id) {
 

@@ -4,6 +4,33 @@ import Rule from '../models/Rule';
 
 class ruleController {
 
+
+  /**
+ * @api index()
+ * @apiGroup ruleController
+ *
+ * @apiSuccess {Array} Loads all rules stored in the database.
+ * 
+ * @apiSuccessExample {json} 
+ *    HTTP/1.1 200 OK
+ *    [
+ *      {
+ *        "id": 1,
+ *        "type": "daily",
+ *        "date": null,
+ *        "days": [],
+ *        "hours": [
+ *         {
+ *            "start": "08:00",
+ *            "end": "10:05"
+ *          }
+ *        ]
+ *      }
+ *     ]
+ *    
+ *
+ */
+
   async index (__, res) {
 
     const rules = await Rule.list();
@@ -11,11 +38,85 @@ class ruleController {
     return res.json(rules);
   }
 
+  /**
+ * @api preriod()
+ * @apiGroup ruleController
+ *
+ * @apiSuccess {Array} List all period rules.
+ * 
+ * @apiSuccessExample {json} 
+ *    HTTP/1.1 200 OK
+ *     [
+ *      {
+ *        "id": 2,
+ *        "type": "specific",
+ *        "date": 01-11-2019,
+ *        "days": [],
+ *        "hours": [
+ *         {
+ *            "start": "05:00",
+ *            "end": "06:05"
+ *          },
+ *          {
+ *            "start": "06:20",
+ *            "end": "07:00"
+ *          }
+ *        ]
+ *      },
+ * 
+ *       {
+ *        "id": 2,
+ *        "type": "specific",
+ *        "date": 10-11-2019,
+ *        "days": [],
+ *        "hours": [
+ *         {
+ *            "start": "05:00",
+ *            "end": "06:05"
+ *          },
+ *          {
+ *            "start": "06:20",
+ *            "end": "07:00"
+ *          }
+ *        ]
+ *      }
+ *     ]
+ *    
+ *
+ */
+
   async period (req, res) {
     const rules = Rule.period(req.query);
 
     res.json(rules);
   }  
+
+  /**
+ * @api store()
+ * @apiGroup ruleController
+ *
+ * @apiSuccess {Array}Save rule in database.
+ * 
+ * @apiSuccessExample {json} 
+ *    HTTP/1.1 200 OK
+ *    [
+ *      {
+ *        "id": 1,
+ *        "type": "daily",
+ *        "date": null,
+ *        "days": [],
+ *        "hours": [
+ *         {
+ *            "start": "08:00",
+ *            "end": "10:05"
+ *          }
+ *        ]
+ *      }
+ *     ]
+ *    
+ *
+ */
+
   async store (req, res) {
     
     const types = ['specific','daily','weekly'];
@@ -118,6 +219,32 @@ class ruleController {
     });
     
   }
+
+  /**
+ * @api delete()
+ * @apiGroup ruleController
+ *
+ * @apiSuccess {Array} Delete rule in database.
+ * 
+ * @apiSuccessExample {json} 
+ *    HTTP/1.1 200 OK
+ *    [
+ *      {
+ *        "id": 1,
+ *        "type": "daily",
+ *        "date": null,
+ *        "days": [],
+ *        "hours": [
+ *         {
+ *            "start": "08:00",
+ *            "end": "10:05"
+ *          }
+ *        ]
+ *      }
+ *     ]
+ *    
+ *
+ */
 
   async delete (req, res) {
 
