@@ -128,6 +128,8 @@ class ruleController {
     const types = ['specific','daily','weekly'];
     const { type } = req.params;
     const { date, start, end } = req.body;
+
+   try { 
     const Rules = await Rule.list();
 
     const rules = Rules.map(r => ({...r, date: r.date? r.date.split('-').reverse().join('-') : null   }) );
@@ -223,6 +225,10 @@ class ruleController {
       status: 'Success',
       rule
     });
+
+  } catch (err) {
+    if(err) return res.status(500).json({ error: err.message})
+  }
     
   }
 
