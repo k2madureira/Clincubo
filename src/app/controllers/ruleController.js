@@ -88,13 +88,14 @@ class ruleController {
   async period (req, res) {
 
     try {
+      const rules = Rule.period(req.query);
+
+      res.json(rules);
       
     } catch (err) {
       if(err) return res.status(500).json({ error: err.message})
     }
-    const rules = Rule.period(req.query);
-
-    res.json(rules);
+   
   }  
 
   /**
@@ -261,9 +262,16 @@ class ruleController {
   async delete (req, res) {
 
     const { id } = req.params;
-    const rules = await Rule.delete(id);
 
-    return res.json(rules);
+    try {
+      const rules = await Rule.delete(id);
+      return res.json(rules);
+
+    } catch (err) {
+      if(err) return res.status(500).json({ error: err.message})
+    }
+
+    
 
   }
 }
