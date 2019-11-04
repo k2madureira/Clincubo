@@ -86,6 +86,12 @@ class ruleController {
  */
 
   async period (req, res) {
+
+    try {
+      
+    } catch (err) {
+      if(err) return res.status(500).json({ error: err.message})
+    }
     const rules = Rule.period(req.query);
 
     res.json(rules);
