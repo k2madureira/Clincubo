@@ -153,8 +153,12 @@ until => 10-11-2019
  
  4. http://localhost:3334/rules/2 **(delete)**
 
-#### Res.json(rules)
+#### Res
 
+```
+	true 	
+
+ ```
 
 #### req.query 
 
