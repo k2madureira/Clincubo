@@ -12,4 +12,4 @@ routes.get('/rules/period', ruleController.period);
 routes.post('/rules/:type', ruleController.store);
 routes.delete('/rules/:id', ruleController.delete);
 
-export default routes;
+module.exports = routes;
