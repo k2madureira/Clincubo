@@ -1,8 +1,8 @@
-import { Router } from 'express';
+const express = require('express');
 
-import ruleController from './app/controllers/ruleController';
+const ruleController = require('./app/controllers/ruleController');
 
-const routes = new Router();
+const routes = express.Router();
 
 routes.get('/',  function(req, res){
   res.redirect('/rules');

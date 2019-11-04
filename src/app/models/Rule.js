@@ -1,8 +1,8 @@
-import { isEqual, isBefore, isAfter } from 'date-fns';
+const { isEqual, isBefore, isAfter } = require ('date-fns');
 const { resolve } = require('path');
-import fs from 'fs';
+const fs = require ('fs');
 
-import pathFile from '../config/database';
+const pathFile = require ('../config/database');
 
 class Rule {
   constructor() {
@@ -376,4 +376,4 @@ class Rule {
 
 }
 
-export default new Rule;
+module.exports = new Rule();

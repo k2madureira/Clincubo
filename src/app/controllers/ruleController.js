@@ -1,5 +1,5 @@
-import { parseISO, format } from 'date-fns';
-import Rule from '../models/Rule';
+const { parseISO, format } = require('date-fns');
+const Rule = require('../models/Rule');
 
 
 class ruleController {
@@ -256,4 +256,4 @@ class ruleController {
   }
 }
 
-export default new ruleController();
+module.exports = new ruleController();
