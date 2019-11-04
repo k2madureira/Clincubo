@@ -356,7 +356,7 @@ class Rule {
     const rules = this.rules;
 
     const index = rules.findIndex(rule => rule.id === parseInt(id));
-    this.rules.splice(index, 1);
+    let delet = this.rules.splice(index, 1);
 
     const json = JSON.stringify(this.rules);
     
@@ -367,8 +367,12 @@ class Rule {
       }
     );
 
-    return this.rules;
-
+    if (delet) {
+      return true;
+    } else {
+      return false;
+    }
+   
 
   }
 
